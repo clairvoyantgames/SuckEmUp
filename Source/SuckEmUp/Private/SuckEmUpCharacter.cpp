@@ -12,10 +12,6 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	// Set the size of our collision capsule.
-	CapsuleComponent->SetCapsuleHalfHeight(96.0f);
-	CapsuleComponent->SetCapsuleRadius(40.0f);
-
 	// Create a camera boom attached to the root (capsule)
 	CameraBoom = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraBoom"));
 	CameraBoom->AttachTo(RootComponent);
