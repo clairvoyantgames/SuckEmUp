@@ -2,6 +2,7 @@
 
 #include "SuckEmUpPrivatePCH.h"
 #include "SuckEmUpCharacter.h"
+#include "SuckUmms.h"
 #include "PaperFlipbookComponent.h"
 
 ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializeProperties& PCIP)
@@ -50,6 +51,9 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 
 	// Note: The reference to the RunningAnimation and IdleAnimation flipbooks to play on the Sprite component
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+	//CapsuleComponent->bGenerateOverlapEvents = true;
+	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ASuckEmUpCharacter::OnBeginOverlap);
+	FollowersOffset = 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,6 +78,7 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
+	//InputComponent->BindAction("Suck", IE_Pressed, this, ASuckEmUpCharacter::SuckEm);
 
 	InputComponent->BindTouch(IE_Pressed, this, &ASuckEmUpCharacter::TouchStarted);
 }
@@ -101,4 +106,31 @@ void ASuckEmUpCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const
 {
 	// jump on any touch
 	Jump();
+}
+
+void ASuckEmUpCharacter::SuckEm()
+{
+
+}
+
+void ASuckEmUpCharacter::OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit)
+{
+	ASuckUmms* thisSuckumms = Cast<ASuckUmms>(OtherActor);
+	if (thisSuckumms)
+	{
+		if (thisSuckumms->bPlayerHas == true)
+		{
+			if (thisSuckumms->character != this)
+			{
+				thisSuckumms->PickUp(this, FollowersOffset);
+				FollowersOffset += 100;
+
+			}
+		}
+		else
+		{
+			thisSuckumms->PickUp(this, FollowersOffset);
+			FollowersOffset += 100;
+		}
+	}
 }

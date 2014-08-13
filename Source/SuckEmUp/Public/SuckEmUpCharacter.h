@@ -3,6 +3,7 @@
 #pragma once
 
 #include "PaperCharacter.h"
+// #include "SuckUmms.h"
 #include "SuckEmUpCharacter.generated.h"
 
 // This class is the default character for SuckEmUp, and it is responsible for all
@@ -33,6 +34,13 @@ protected:
 	// The animation to play while idle (standing still)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	class UPaperFlipbook* IdleAnimation;
+
+	void SuckEm();
+
+	float FollowersOffset;
+
+	UFUNCTION()
+		void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
 
 protected:
 
