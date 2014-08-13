@@ -33,7 +33,7 @@ void ASuckUmms::Tick(float DeltaSeconds)
 	if (bPlayerHas)
 	{
 		RateOfMovement += DeltaSeconds * 1/(500 + FollowRateOffset);
-		this->SetActorLocation(FMath::Lerp(GetActorLocation(), character->GetActorLocation(), FMath::Clamp(RateOfMovement, 0.0f, 1.0f)));
+		this->SetActorLocation(FMath::Lerp(GetActorLocation(), (character->GetActorLocation() + (character->GetActorForwardVector()*-FollowRateOffset)), FMath::Clamp(RateOfMovement, 0.0f, 1.0f)));
 	}
 }
 

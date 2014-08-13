@@ -27,6 +27,8 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	SideViewCameraComponent->OrthoWidth = 2048.0f;
 	SideViewCameraComponent->AttachTo(CameraBoom, USpringArmComponent::SocketName);
 
+	ConeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ConeMesh"));
+	ConeMesh->AttachTo(RootComponent);
 	// Prevent all automatic rotation behavior on the camera, character, and camera component
 	CameraBoom->bAbsoluteRotation = true;
 	SideViewCameraComponent->bUseControllerViewRotation = false;
@@ -37,7 +39,7 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	CharacterMovement->AirControl = 0.80f;
 	CharacterMovement->JumpZVelocity = 1000.f;
 	CharacterMovement->GroundFriction = 3.0f;
-	CharacterMovement->MaxWalkSpeed = 600.0f;
+	CharacterMovement->MaxWalkSpeed = 1800;
 	CharacterMovement->MaxFlySpeed = 600.0f;
 
 	// Lock character motion onto the XZ plane, so the character can't move in or out of the screen
@@ -53,7 +55,8 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 	//CapsuleComponent->bGenerateOverlapEvents = true;
 	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ASuckEmUpCharacter::OnBeginOverlap);
-	FollowersOffset = 0;
+	FollowersOffset = 100;
+	relativeScale = 1;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,7 +81,7 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
-	//InputComponent->BindAction("Suck", IE_Pressed, this, ASuckEmUpCharacter::SuckEm);
+	InputComponent->BindAction("Suck", IE_Pressed, this, &ASuckEmUpCharacter::SuckEm);
 
 	InputComponent->BindTouch(IE_Pressed, this, &ASuckEmUpCharacter::TouchStarted);
 }
@@ -110,7 +113,10 @@ void ASuckEmUpCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const
 
 void ASuckEmUpCharacter::SuckEm()
 {
-
+	relativeScale += .05;
+	FVector newVector = FVector(relativeScale);
+	ConeMesh->SetRelativeScale3D(newVector);
+	ConeMesh->SetWorldLocation(GetActorLocation() + GetActorForwardVector() * (50 + (relativeScale * 300)) );
 }
 
 void ASuckEmUpCharacter::OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit)

@@ -26,6 +26,12 @@ class ASuckEmUpCharacter : public APaperCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	TSubobjectPtr<class USpringArmComponent> CameraBoom;
 
+	// Cone mesh
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ConeMesh)
+	TSubobjectPtr<UStaticMeshComponent> ConeMesh;
+
+	float relativeScale;
+
 protected:
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
