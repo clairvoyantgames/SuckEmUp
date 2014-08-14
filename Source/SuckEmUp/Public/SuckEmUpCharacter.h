@@ -30,7 +30,22 @@ class ASuckEmUpCharacter : public APaperCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ConeMesh)
 	TSubobjectPtr<UStaticMeshComponent> ConeMesh;
 
+	// Override Tick
+	virtual void Tick(float DeltaSeconds) OVERRIDE;
+
 	float relativeScale;
+
+	float relativeBoxScale;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	TSubobjectPtr<class UBoxComponent> CollisionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	bool CanWalk;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
+	float baseSuckerScale;
+//		TSubobjectPtr<class U> CollisionCom2;
 
 protected:
 	// The animation to play while running around
@@ -46,7 +61,7 @@ protected:
 	float FollowersOffset;
 
 	UFUNCTION()
-		void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
+	void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
 
 protected:
 
