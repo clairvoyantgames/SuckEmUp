@@ -38,9 +38,19 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	// Note: The reference to the RunningAnimation and IdleAnimation flipbooks to play on the Sprite component
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 	//CapsuleComponent->bGenerateOverlapEvents = true;
-	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ASuckEmUpCharacter::OnBeginOverlap);
+	//CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ASuckEmUpCharacter::OnBeginOverlap);
 	FollowersOffset = 100;
-	relativeScale = 1;
+	relativeScale = baseSuckerScale;
+
+	CollisionComp = PCIP.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CollisionComp"));
+	CollisionComp->InitBoxExtent(FVector(150));
+	CollisionComp->AttachTo(ConeMesh);
+	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	CollisionComp->bGenerateOverlapEvents = true;
+
+	CanWalk = true;
+
+	relativeBoxScale = 1;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,21 +82,24 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 
 void ASuckEmUpCharacter::MoveRight(float Value)
 {
-	// Update animation to match the motion
-	UpdateAnimation();
-
-	// Set the rotation so that the character faces his direction of travel.
-	if (Value < 0.0f)
+	if (CanWalk)
 	{
-		Sprite->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
-	}
-	else if (Value > 0.0f)
-	{
-		Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
-	}
+		// Update animation to match the motion
+		UpdateAnimation();
 
-	// Apply the input to the character motion
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+		// Set the rotation so that the character faces his direction of travel.
+		if (Value < 0.0f)
+		{
+			Sprite->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
+		}
+		else if (Value > 0.0f)
+		{
+			Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
+		}
+
+		// Apply the input to the character motion
+		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
+	}
 }
 
 void ASuckEmUpCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
@@ -98,13 +111,56 @@ void ASuckEmUpCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const
 void ASuckEmUpCharacter::SuckEm()
 {
 	relativeScale += .05;
-	FVector newVector = FVector(relativeScale);
-	ConeMesh->SetRelativeScale3D(newVector);
+	relativeBoxScale += .025;
+	relativeScale = FMath::Clamp(relativeScale, baseSuckerScale, 3.0f);
+	ConeMesh->SetRelativeScale3D(FVector(relativeScale));
+	CollisionComp->SetRelativeScale3D(FVector(relativeBoxScale));
 	ConeMesh->SetWorldLocation(GetActorLocation() + GetActorForwardVector() * (50 + (relativeScale * 300)) );
+
+	FRotator newRotation = this->CapsuleComponent->RelativeRotation;
+
+	if (newRotation.Yaw != 0)
+	{
+		//CollisionComp->SetWorldLocation(GetActorLocation() + GetActorForwardVector() * (50 + (relativeScale * 300)) - FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0));
+		//CollisionComp->SetWorldLocation(GetActorLocation() - FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0) - FVector(50, 0, 0));
+
+	}
+	else
+	{
+		//CollisionComp->SetWorldLocation(GetActorLocation()  + FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0));
+	}
+
+	TArray<AActor*> OverlappingActors;
+	CollisionComp->GetOverlappingActors(OverlappingActors);
+	if (OverlappingActors.Num() > 0)
+	{
+		for (int32 x = 0; x < OverlappingActors.Num(); x++)
+		{
+			ASuckUmms* thisSuckumms = Cast<ASuckUmms>(OverlappingActors[x]);
+			if (thisSuckumms)
+			{
+				if (thisSuckumms->bPlayerHas == true)
+				{
+					if (thisSuckumms->character != this)
+					{
+						thisSuckumms->PickUp(this, FollowersOffset);
+						FollowersOffset += 50;
+
+					}
+				}
+				else
+				{
+					thisSuckumms->PickUp(this, FollowersOffset);
+					FollowersOffset += 50;
+				}
+			}
+		}
+	}
 }
 
 void ASuckEmUpCharacter::OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit)
 {
+	/*
 	ASuckUmms* thisSuckumms = Cast<ASuckUmms>(OtherActor);
 	if (thisSuckumms)
 	{
@@ -122,5 +178,66 @@ void ASuckEmUpCharacter::OnBeginOverlap(AActor* OtherActor, class UPrimitiveComp
 			thisSuckumms->PickUp(this, FollowersOffset);
 			FollowersOffset += 100;
 		}
+	}*/
+}
+
+void ASuckEmUpCharacter::Tick(float DeltaSeconds)
+{
+	if (relativeScale != baseSuckerScale)
+	{
+		CanWalk = false;
+		relativeScale -= .001;
+		relativeBoxScale -= .0005;
+		relativeScale = FMath::Clamp(relativeScale, baseSuckerScale, 2.5f);
+		ConeMesh->SetRelativeScale3D(FVector(relativeScale));
+		CollisionComp->SetRelativeScale3D(FVector(relativeBoxScale));
+		ConeMesh->SetWorldLocation(GetActorLocation() + GetActorForwardVector() * (50 + (relativeScale * 300)));
+
+		FRotator newRotation = this->CapsuleComponent->RelativeRotation;
+
+		if (newRotation.Yaw != 0)
+		{
+			CollisionComp->SetWorldLocation(ConeMesh->GetComponentLocation() + FVector(75,0,0));
+			//CollisionComp->SetWorldLocation(GetActorLocation()  - FVector(FVector::Dist(GetActorLocation(),ConeMesh->GetComponentLocation())/2,0,0) - FVector(50,0,0));
+		}
+		else
+		{
+			CollisionComp->SetWorldLocation(ConeMesh->GetComponentLocation() - FVector(75, 0, 0));
+			//CollisionComp->SetRelativeLocation(FVector(100, 0, 0));
+			//CollisionComp->SetWorldLocation(GetActorLocation()  + FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0));
+		}
+		ConeMesh->SetVisibility(true);
+
+		TArray<AActor*> OverlappingActors;
+		CollisionComp->GetOverlappingActors(OverlappingActors);
+		if (OverlappingActors.Num() > 0)
+		{
+			for (int32 x = 0; x < OverlappingActors.Num(); x++)
+			{
+				ASuckUmms* thisSuckumms = Cast<ASuckUmms>(OverlappingActors[x]);
+				if (thisSuckumms)
+				{
+					if (thisSuckumms->bPlayerHas == true)
+					{
+						if (thisSuckumms->character != this)
+						{
+							thisSuckumms->PickUp(this, FollowersOffset);
+							FollowersOffset += 50;
+
+						}
+					}
+					else
+					{
+						thisSuckumms->PickUp(this, FollowersOffset);
+						FollowersOffset += 50;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		CanWalk = true;
+		ConeMesh->SetVisibility(false);
 	}
 }
