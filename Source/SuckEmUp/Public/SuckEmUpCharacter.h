@@ -18,14 +18,6 @@ class ASuckEmUpCharacter : public APaperCharacter
 {
 	GENERATED_UCLASS_BODY()
 
-	/** Side view camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	TSubobjectPtr<UCameraComponent> SideViewCameraComponent;
-
-	/** Camera boom positioning the camera beside the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
-	TSubobjectPtr<class USpringArmComponent> CameraBoom;
-
 	// Cone mesh
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ConeMesh)
 	TSubobjectPtr<UStaticMeshComponent> ConeMesh;
@@ -40,6 +32,10 @@ protected:
 	// The animation to play while idle (standing still)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	class UPaperFlipbook* IdleAnimation;
+
+	// The animation to play while idle (standing still)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	class UPaperFlipbook* SuckAnimation;
 
 	void SuckEm();
 

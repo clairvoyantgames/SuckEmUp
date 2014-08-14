@@ -12,26 +12,10 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-
-	// Create a camera boom attached to the root (capsule)
-	CameraBoom = PCIP.CreateDefaultSubobject<USpringArmComponent>(this, TEXT("CameraBoom"));
-	CameraBoom->AttachTo(RootComponent);
-	CameraBoom->TargetArmLength = 500.0f;
-	CameraBoom->SocketOffset = FVector(0.0f, 0.0f, 75.0f);
-	CameraBoom->bAbsoluteRotation = true;
-	CameraBoom->RelativeRotation = FRotator(0.0f, -90.0f, 0.0f);
-
-	// Create an orthographic camera (no perspective) and attach it to the boom
-	SideViewCameraComponent = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("SideViewCamera"));
-	SideViewCameraComponent->ProjectionMode = ECameraProjectionMode::Orthographic;
-	SideViewCameraComponent->OrthoWidth = 2048.0f;
-	SideViewCameraComponent->AttachTo(CameraBoom, USpringArmComponent::SocketName);
-
+	
 	ConeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ConeMesh"));
 	ConeMesh->AttachTo(RootComponent);
 	// Prevent all automatic rotation behavior on the camera, character, and camera component
-	CameraBoom->bAbsoluteRotation = true;
-	SideViewCameraComponent->bUseControllerViewRotation = false;
 	CharacterMovement->bOrientRotationToMovement = false;
 
 	// Configure character movement
