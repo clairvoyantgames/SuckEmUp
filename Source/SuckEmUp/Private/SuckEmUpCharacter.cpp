@@ -73,39 +73,68 @@ void ASuckEmUpCharacter::UpdateAnimation()
 void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
 {
 	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
-	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ASuckEmUpCharacter::MyJump);
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
 	InputComponent->BindAction("Suck", IE_Pressed, this, &ASuckEmUpCharacter::SuckEm);
-
+	InputComponent->BindAction("Up", IE_Pressed, this, &ASuckEmUpCharacter::Up);
 	InputComponent->BindTouch(IE_Pressed, this, &ASuckEmUpCharacter::TouchStarted);
 }
 
 void ASuckEmUpCharacter::MoveRight(float Value)
 {
+	// Update animation to match the motion
+	UpdateAnimation();
+
 	if (CanWalk)
 	{
-		// Update animation to match the motion
-		UpdateAnimation();
-
 		// Set the rotation so that the character faces his direction of travel.
 		if (Value < 0.0f)
 		{
-			Sprite->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
+			CapsuleComponent->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
+			//Sprite->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
 		}
 		else if (Value > 0.0f)
 		{
-			Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
+			CapsuleComponent->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
+			//Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
 		}
 
 		// Apply the input to the character motion
 		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 	}
+	else
+	{
+		// Set the rotation so that the character faces his direction of travel.
+		if (Value < 0.0f)
+		{
+			CapsuleComponent->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
+			//Sprite->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
+		}
+		else if (Value > 0.0f)
+		{
+			CapsuleComponent->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
+			//Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
+		}
+	}
 }
+void ASuckEmUpCharacter::Up()
+{
 
+}
+void ASuckEmUpCharacter::MyJump()
+{
+	if (CanWalk)
+	{
+		Super::Jump();
+	}
+}
 void ASuckEmUpCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
 {
-	// jump on any touch
-	Jump();
+	if (CanWalk)
+	{
+		// jump on any touch
+		Jump();
+	}
 }
 
 void ASuckEmUpCharacter::SuckEm()

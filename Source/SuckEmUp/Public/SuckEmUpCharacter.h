@@ -58,6 +58,10 @@ protected:
 	
 	void SuckEm();
 
+	void Up();
+
+	void MyJump();
+
 	float FollowersOffset;
 
 	UFUNCTION()
