@@ -11,5 +11,8 @@ ASuckEmUpGameMode::ASuckEmUpGameMode(const class FPostConstructInitializePropert
 	if (PlayerPawnBPClass.Object != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Object;
+		//FString thisString;
+		//GEngine->GameViewport->CreatePlayer(1, thisString, true);
 	}
+	
 }

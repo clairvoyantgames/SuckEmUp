@@ -4,6 +4,7 @@
 #include "SuckEmUpCharacter.h"
 #include "SuckUmms.h"
 #include "PaperFlipbookComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
@@ -51,6 +52,8 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	CanWalk = true;
 
 	relativeBoxScale = 1;
+
+	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -77,7 +80,8 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
 	InputComponent->BindAction("Suck", IE_Pressed, this, &ASuckEmUpCharacter::SuckEm);
 	InputComponent->BindAction("Up", IE_Pressed, this, &ASuckEmUpCharacter::Up);
-	InputComponent->BindTouch(IE_Pressed, this, &ASuckEmUpCharacter::TouchStarted);
+
+	
 }
 
 void ASuckEmUpCharacter::MoveRight(float Value)
@@ -119,21 +123,27 @@ void ASuckEmUpCharacter::MoveRight(float Value)
 }
 void ASuckEmUpCharacter::Up()
 {
+	FString thisString;
+	//this->bFindCameraComponentWhenViewTarget = true;
 
+	GEngine->GameViewport->CreatePlayer(1, thisString, true);
+	for (TActorIterator<ACameraActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ACameraActor* thisCamera;
+		thisCamera = *ActorItr;
+		UGameplayStatics::GetPlayerController(this, 0)->SetViewTargetWithBlend(thisCamera);
+		UGameplayStatics::GetPlayerController(this, 1)->SetViewTargetWithBlend(thisCamera);
+		break;
+	}
+	
+	
+	
 }
 void ASuckEmUpCharacter::MyJump()
 {
 	if (CanWalk)
 	{
 		Super::Jump();
-	}
-}
-void ASuckEmUpCharacter::TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location)
-{
-	if (CanWalk)
-	{
-		// jump on any touch
-		Jump();
 	}
 }
 
@@ -150,13 +160,11 @@ void ASuckEmUpCharacter::SuckEm()
 
 	if (newRotation.Yaw != 0)
 	{
-		//CollisionComp->SetWorldLocation(GetActorLocation() + GetActorForwardVector() * (50 + (relativeScale * 300)) - FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0));
-		//CollisionComp->SetWorldLocation(GetActorLocation() - FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0) - FVector(50, 0, 0));
-
+		CollisionComp->SetWorldLocation(ConeMesh->GetComponentLocation() + FVector(75, 0, 0));
 	}
 	else
 	{
-		//CollisionComp->SetWorldLocation(GetActorLocation()  + FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0));
+		CollisionComp->SetWorldLocation(ConeMesh->GetComponentLocation() - FVector(75, 0, 0));
 	}
 
 	TArray<AActor*> OverlappingActors;
@@ -227,13 +235,10 @@ void ASuckEmUpCharacter::Tick(float DeltaSeconds)
 		if (newRotation.Yaw != 0)
 		{
 			CollisionComp->SetWorldLocation(ConeMesh->GetComponentLocation() + FVector(75,0,0));
-			//CollisionComp->SetWorldLocation(GetActorLocation()  - FVector(FVector::Dist(GetActorLocation(),ConeMesh->GetComponentLocation())/2,0,0) - FVector(50,0,0));
 		}
 		else
 		{
 			CollisionComp->SetWorldLocation(ConeMesh->GetComponentLocation() - FVector(75, 0, 0));
-			//CollisionComp->SetRelativeLocation(FVector(100, 0, 0));
-			//CollisionComp->SetWorldLocation(GetActorLocation()  + FVector(FVector::Dist(GetActorLocation(), ConeMesh->GetComponentLocation()) / 2, 0, 0));
 		}
 		ConeMesh->SetVisibility(true);
 
@@ -269,4 +274,13 @@ void ASuckEmUpCharacter::Tick(float DeltaSeconds)
 		CanWalk = true;
 		ConeMesh->SetVisibility(false);
 	}
+}
+
+void ASuckEmUpCharacter::PossessedBy(class AController* InController)
+{
+
+	Super::PossessedBy(InController);
+
+	// [server] as soon as PlayerState is assigned, set team colors of this pawn for local player
+	//UpdateTeamColorsAllMIDs();
 }

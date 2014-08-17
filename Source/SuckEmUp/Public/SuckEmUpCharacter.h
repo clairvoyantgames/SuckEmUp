@@ -18,6 +18,10 @@ class ASuckEmUpCharacter : public APaperCharacter
 {
 	GENERATED_UCLASS_BODY()
 
+
+		/** [server] perform PlayerState related setup */
+		virtual void PossessedBy(class AController* C) OVERRIDE;
+
 	// Cone mesh
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ConeMesh)
 	TSubobjectPtr<UStaticMeshComponent> ConeMesh;
@@ -37,7 +41,9 @@ class ASuckEmUpCharacter : public APaperCharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float baseSuckerScale;
-//		TSubobjectPtr<class U> CollisionCom2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = camera)
+	ACameraActor* levelsCameraActor;
 
 protected:
 	// The animation to play while running around
@@ -74,9 +80,6 @@ protected:
 
 	/** Called for side to side input */
 	void MoveRight(float Value);
-
-	/** Handle touch inputs. */
-	void TouchStarted(const ETouchIndex::Type FingerIndex, const FVector Location);
 
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
