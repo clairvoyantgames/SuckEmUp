@@ -42,9 +42,6 @@ class ASuckEmUpCharacter : public APaperCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float baseSuckerScale;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = camera)
-	ACameraActor* levelsCameraActor;
-
 protected:
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
@@ -61,6 +58,14 @@ protected:
 	// The animation to play while idle (standing still)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	class UPaperFlipbook* JumpAnimation;
+
+	// The animation to play while idle (standing still)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	class UPaperFlipbook* SuckingConeAnimation;
+
+	// The animation to play while idle (standing still)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	class UPaperFlipbook* SuckDownAnimation;
 	
 	void SuckEm();
 

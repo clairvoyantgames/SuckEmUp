@@ -73,7 +73,7 @@ void ASuckEmUpCharacter::UpdateAnimation()
 	}
 	if (relativeScale != baseSuckerScale)
 	{
-		DesiredAnimation = SuckAnimation;
+		DesiredAnimation = SuckDownAnimation;
 	}
 
 	Sprite->SetFlipbook(DesiredAnimation);
@@ -89,8 +89,6 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
 	InputComponent->BindAction("Suck", IE_Pressed, this, &ASuckEmUpCharacter::SuckEm);
 	InputComponent->BindAction("Up", IE_Pressed, this, &ASuckEmUpCharacter::Up);
-
-	
 }
 
 void ASuckEmUpCharacter::MoveRight(float Value)
@@ -133,7 +131,6 @@ void ASuckEmUpCharacter::MoveRight(float Value)
 void ASuckEmUpCharacter::Up()
 {
 	FString thisString;
-	//this->bFindCameraComponentWhenViewTarget = true;
 
 	GEngine->GameViewport->CreatePlayer(1, thisString, true);
 	for (TActorIterator<ACameraActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
