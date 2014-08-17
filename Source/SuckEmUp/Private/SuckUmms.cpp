@@ -8,7 +8,7 @@ ASuckUmms::ASuckUmms(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
 	CollisionComp = PCIP.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CollisionComp"));
-	CollisionComp->InitBoxExtent(FVector(100));
+	CollisionComp->InitBoxExtent(FVector(25));
 	RootComponent = CollisionComp;
 
 	Mesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Mesh"));
@@ -32,7 +32,8 @@ void ASuckUmms::Tick(float DeltaSeconds)
 {
 	if (bPlayerHas)
 	{
-		RateOfMovement += DeltaSeconds * 1/(100 + FollowRateOffset);
+		
+		RateOfMovement += DeltaSeconds * 1/FollowRateOffset;
 		this->SetActorLocation(FMath::Lerp(GetActorLocation(), (character->GetActorLocation() + (character->GetActorForwardVector()*-FollowRateOffset)), FMath::Clamp(RateOfMovement, 0.0f, 1.0f)));
 	}
 }

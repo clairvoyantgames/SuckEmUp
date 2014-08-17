@@ -52,6 +52,7 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	CanWalk = true;
 
 	relativeBoxScale = 1;
+	CapsuleComponent->SetCapsuleSize(60, 60);
 
 	
 }
@@ -66,6 +67,14 @@ void ASuckEmUpCharacter::UpdateAnimation()
 
 	// Are we moving or standing still?
 	UPaperFlipbook* DesiredAnimation = (PlayerSpeed > 0.0f) ? RunningAnimation : IdleAnimation;
+	if (this->GetMovementComponent()->IsFalling())
+	{
+		DesiredAnimation = JumpAnimation;
+	}
+	if (relativeScale != baseSuckerScale)
+	{
+		DesiredAnimation = SuckAnimation;
+	}
 
 	Sprite->SetFlipbook(DesiredAnimation);
 }
@@ -143,12 +152,20 @@ void ASuckEmUpCharacter::MyJump()
 {
 	if (CanWalk)
 	{
+		UPaperFlipbook* DesiredAnimation = JumpAnimation;
+
+		Sprite->SetFlipbook(DesiredAnimation);
 		Super::Jump();
+		
 	}
 }
 
 void ASuckEmUpCharacter::SuckEm()
 {
+	UPaperFlipbook* DesiredAnimation = SuckAnimation;
+
+	Sprite->SetFlipbook(DesiredAnimation);
+
 	relativeScale += .05;
 	relativeBoxScale += .025;
 	relativeScale = FMath::Clamp(relativeScale, baseSuckerScale, 3.0f);
@@ -223,8 +240,8 @@ void ASuckEmUpCharacter::Tick(float DeltaSeconds)
 	if (relativeScale != baseSuckerScale)
 	{
 		CanWalk = false;
-		relativeScale -= .001;
-		relativeBoxScale -= .0005;
+		relativeScale -= .0020;
+		relativeBoxScale -= .001;
 		relativeScale = FMath::Clamp(relativeScale, baseSuckerScale, 2.5f);
 		ConeMesh->SetRelativeScale3D(FVector(relativeScale));
 		CollisionComp->SetRelativeScale3D(FVector(relativeBoxScale));
