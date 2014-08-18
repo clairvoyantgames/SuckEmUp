@@ -4,6 +4,8 @@
 
 #include "PaperCharacter.h"
 // #include "SuckUmms.h"
+#include "PaperFlipbook.h"
+#include "Paper2DModule.h"
 #include "SuckEmUpCharacter.generated.h"
 
 // This class is the default character for SuckEmUp, and it is responsible for all
@@ -26,6 +28,13 @@ class ASuckEmUpCharacter : public APaperCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ConeMesh)
 	TSubobjectPtr<UStaticMeshComponent> ConeMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = ConeMesh)
+	TSubobjectPtr<UPaperFlipbookComponent> ConeFlipBook;
+
+	// class coming in from bp
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Popper)
+	TSubclassOf<class ASuckUmms> SuckUmmsClass;
+
 	// Override Tick
 	virtual void Tick(float DeltaSeconds) OVERRIDE;
 
@@ -36,12 +45,19 @@ class ASuckEmUpCharacter : public APaperCharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	TSubobjectPtr<class UBoxComponent> CollisionComp;
 
+	//UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly)
+	//UPaperFlipbookComponent* ConeSprite;
+	//Sprite* TheCone;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
 	bool CanWalk;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float baseSuckerScale;
 
+	void ShootSuckUmms();
+
+	void StunMe(float amount);
 protected:
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
@@ -78,6 +94,10 @@ protected:
 	UFUNCTION()
 	void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
 
+	bool bStun;
+
+	
+	float StunLength;
 protected:
 
 	/** Called to choose the correct animation to play based on the character's movement state */

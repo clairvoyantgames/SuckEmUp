@@ -13,7 +13,7 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-	
+	ConeFlipBook = PCIP.CreateDefaultSubobject<UPaperFlipbookComponent>(this, TEXT("Conez"));
 	ConeMesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ConeMesh"));
 	ConeMesh->AttachTo(RootComponent);
 	// Prevent all automatic rotation behavior on the camera, character, and camera component
@@ -21,7 +21,7 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 
 	// Configure character movement
 	CharacterMovement->GravityScale = 2.0f;
-	CharacterMovement->AirControl = 0.80f;
+	CharacterMovement->AirControl = 3.0f;
 	CharacterMovement->JumpZVelocity = 1000.f;
 	CharacterMovement->GroundFriction = 3.0f;
 	CharacterMovement->MaxWalkSpeed = 1800;
@@ -42,7 +42,6 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	//CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ASuckEmUpCharacter::OnBeginOverlap);
 	FollowersOffset = 100;
 	relativeScale = baseSuckerScale;
-
 	CollisionComp = PCIP.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CollisionComp"));
 	CollisionComp->InitBoxExtent(FVector(150));
 	CollisionComp->AttachTo(ConeMesh);
@@ -54,8 +53,20 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 
 	relativeBoxScale = 1;
 	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn,ECollisionResponse::ECR_Ignore);
+	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn,ECollisionResponse::ECR_Overlap);
 
+	/*ConeSprite;
+	if (ConeSprite)
+	{
+		//Sprite->SetSprite(SpriteTexture);
+		ConeSprite->bVisible = true;
+		ConeSprite->bAbsoluteScale = true;
+		//Sprite->AttachParent = DrawSphereComponent;
+		//Components.Add(Sprite);
+	}*/
 	
+	bStun = false;
+	StunLength = 0.0f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -90,15 +101,13 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
 	InputComponent->BindAction("Suck", IE_Pressed, this, &ASuckEmUpCharacter::SuckEm);
 	InputComponent->BindAction("Up", IE_Pressed, this, &ASuckEmUpCharacter::Up);
+	InputComponent->BindAction("Shoot", IE_Pressed, this, &ASuckEmUpCharacter::ShootSuckUmms);
 }
 
 void ASuckEmUpCharacter::MoveRight(float Value)
 {
 	// Update animation to match the motion
 	UpdateAnimation();
-
-	if (CanWalk)
-	{
 		// Set the rotation so that the character faces his direction of travel.
 		if (Value < 0.0f)
 		{
@@ -111,24 +120,12 @@ void ASuckEmUpCharacter::MoveRight(float Value)
 			//Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
 		}
 
+	if (CanWalk && !bStun)
+	{
 		// Apply the input to the character motion
 		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), Value);
 	}
-	else
-	{
-		// Set the rotation so that the character faces his direction of travel.
-		if (Value < 0.0f)
-		{
-			CapsuleComponent->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
-			//Sprite->SetWorldRotation(FRotator(0.0, 180.0f, 0.0f));
 		}
-		else if (Value > 0.0f)
-		{
-			CapsuleComponent->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
-			//Sprite->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
-		}
-	}
-}
 void ASuckEmUpCharacter::Up()
 {
 	FString thisString;
@@ -148,18 +145,18 @@ void ASuckEmUpCharacter::Up()
 }
 void ASuckEmUpCharacter::MyJump()
 {
-	if (CanWalk)
+	if (CanWalk && !bStun)
 	{
 		UPaperFlipbook* DesiredAnimation = JumpAnimation;
-
 		Sprite->SetFlipbook(DesiredAnimation);
 		Super::Jump();
-		
 	}
 }
 
 void ASuckEmUpCharacter::SuckEm()
 {
+	if (!bStun)
+	{
 	UPaperFlipbook* DesiredAnimation = SuckAnimation;
 
 	Sprite->SetFlipbook(DesiredAnimation);
@@ -206,6 +203,24 @@ void ASuckEmUpCharacter::SuckEm()
 					FollowersOffset += 50;
 				}
 			}
+				else
+				{
+					ASuckEmUpCharacter* thisCharacter = Cast<ASuckEmUpCharacter>(OverlappingActors[x]);
+					if (thisCharacter && thisCharacter != this)
+					{
+						/* Spawning the BallPoppers */
+						FActorSpawnParameters SpawnParams;
+						FVector SuckUmmsLocation = this->GetActorLocation();
+						SpawnParams.Owner = this;
+						SpawnParams.Instigator = Instigator;
+						thisCharacter->TeleportTo(FVector(-860, -210, 163.5), FRotator(0));
+						ASuckUmms* thisSuckumms = GetWorld()->SpawnActor<ASuckUmms>(SuckUmmsClass, SuckUmmsLocation, FRotator(0), SpawnParams);
+						thisSuckumms->PickUp(this, FollowersOffset);
+						FollowersOffset += 50;
+
+		}
+	}
+}
 		}
 	}
 }
@@ -235,7 +250,15 @@ void ASuckEmUpCharacter::OnBeginOverlap(AActor* OtherActor, class UPrimitiveComp
 
 void ASuckEmUpCharacter::Tick(float DeltaSeconds)
 {
-	if (relativeScale != baseSuckerScale)
+	if (bStun)
+	{
+		StunLength -= DeltaSeconds;
+		if (StunLength <= 0)
+		{
+			bStun = false;
+		}
+	}
+	else if (relativeScale != baseSuckerScale)
 	{
 		CanWalk = false;
 		relativeScale -= .0020;
@@ -293,9 +316,23 @@ void ASuckEmUpCharacter::Tick(float DeltaSeconds)
 
 void ASuckEmUpCharacter::PossessedBy(class AController* InController)
 {
-
 	Super::PossessedBy(InController);
+}
 
-	// [server] as soon as PlayerState is assigned, set team colors of this pawn for local player
-	//UpdateTeamColorsAllMIDs();
+void ASuckEmUpCharacter::ShootSuckUmms()
+{
+	for (TActorIterator<ASuckUmms> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		ASuckUmms* thisSuckumms = Cast<ASuckUmms>(*ActorItr);
+		if (thisSuckumms->character == this)
+		{
+			thisSuckumms->ThrowMe(GetActorLocation() + GetActorForwardVector() * 500);
+			break;
+		}
+	}
+}
+void ASuckEmUpCharacter::StunMe(float amount)
+{
+	StunLength = amount;
+	bStun = true;
 }
