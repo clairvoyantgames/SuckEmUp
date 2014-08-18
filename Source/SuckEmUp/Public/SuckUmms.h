@@ -34,6 +34,10 @@ class SUCKEMUP_API ASuckUmms : public AActor
 	void PickUp(ASuckEmUpCharacter* thisCharacter, float followRate);
 
 	float RateOfMovement;
-
+	bool bPlayerThrow;
 	float FollowRateOffset;
+	FVector ToHitLocation;
+	void ThrowMe(FVector hitLocation);
+	UFUNCTION()
+	void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
 };
