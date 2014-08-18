@@ -14,4 +14,9 @@ class ASuckEmUpGameMode : public AGameMode
 {
 	GENERATED_UCLASS_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
+	int32 winCount;
+
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void SpawnSecondPlayer();
 };

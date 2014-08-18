@@ -8,11 +8,17 @@ ASuckEmUpGameMode::ASuckEmUpGameMode(const class FPostConstructInitializePropert
 {
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FObjectFinder<UClass> PlayerPawnBPClass(TEXT("Class'/Game/Blueprints/MyCharacter.MyCharacter_C'"));
+
+	winCount = 5;
+
 	if (PlayerPawnBPClass.Object != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Object;
 		//FString thisString;
 		//GEngine->GameViewport->CreatePlayer(1, thisString, true);
-	}
-	
+	}	
+}
+
+void ASuckEmUpGameMode::SpawnSecondPlayer(){
+	UGameplayStatics::CreatePlayer(this,-1,true);
 }
