@@ -48,11 +48,12 @@ ASuckEmUpCharacter::ASuckEmUpCharacter(const class FPostConstructInitializePrope
 	CollisionComp->AttachTo(ConeMesh);
 	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	CollisionComp->bGenerateOverlapEvents = true;
+	
 
 	CanWalk = true;
 
 	relativeBoxScale = 1;
-	CapsuleComponent->SetCapsuleSize(60, 60);
+	CapsuleComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn,ECollisionResponse::ECR_Ignore);
 
 	
 }
