@@ -42,6 +42,7 @@ void ASuckUmms::Tick(float DeltaSeconds)
 			{
 				bPlayerThrow = false;
 				RateOfMovement = 0;
+				bPlayerHas = false;
 			}
 		}
 		else

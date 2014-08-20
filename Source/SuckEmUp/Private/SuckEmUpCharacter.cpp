@@ -324,7 +324,7 @@ void ASuckEmUpCharacter::ShootSuckUmms()
 	for (TActorIterator<ASuckUmms> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		ASuckUmms* thisSuckumms = Cast<ASuckUmms>(*ActorItr);
-		if (thisSuckumms->character == this)
+		if (thisSuckumms->bPlayerHas && thisSuckumms->character == this)
 		{
 			thisSuckumms->ThrowMe(GetActorLocation() + GetActorForwardVector() * 500);
 			break;
