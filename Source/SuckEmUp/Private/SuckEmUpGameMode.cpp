@@ -11,6 +11,8 @@ ASuckEmUpGameMode::ASuckEmUpGameMode(const class FPostConstructInitializePropert
 
 	winCount = 5;
 
+	gameStarted = false;
+
 	if (PlayerPawnBPClass.Object != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Object;

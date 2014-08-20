@@ -17,6 +17,9 @@ class ASuckEmUpGameMode : public AGameMode
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	int32 winCount;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Game)
+	bool gameStarted;
+
 	UFUNCTION(BlueprintCallable, Category = "Game")
 	void SpawnSecondPlayer();
 };
