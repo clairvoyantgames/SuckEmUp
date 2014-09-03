@@ -7,26 +7,18 @@
 ASuckUmms::ASuckUmms(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
-	CollisionComp = PCIP.CreateDefaultSubobject<UBoxComponent>(this, TEXT("CollisionComp"));
-	CollisionComp->InitBoxExtent(FVector(25));
-	RootComponent = CollisionComp;
-
-	Mesh = PCIP.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("Mesh"));
-	Mesh->AttachTo(RootComponent);
-
-	CollisionComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-
 	PrimaryActorTick.bCanEverTick = true;
 
-	CollisionComp->bGenerateOverlapEvents = true;
+	RootComponent = PCIP.CreateDefaultSubobject<UPaperFlipbookComponent>(this, TEXT("Sprite"));
+	
 	bPlayerHas = false;
-	bPlayerThrow = false;
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &ASuckUmms::OnBeginOverlap);
+	bPlayerThrow = false;	
 }
 
 
 void ASuckUmms::BeginPlay()
 {
+	Super::PostBeginPlay();
 	RateOfMovement = 0;
 }
 
@@ -48,15 +40,15 @@ void ASuckUmms::Tick(float DeltaSeconds)
 		else
 		{
 			RateOfMovement += DeltaSeconds * 1 / FollowRateOffset;
-			this->SetActorLocation(FMath::Lerp(GetActorLocation(), (character->GetActorLocation() + (character->GetActorForwardVector()*-FollowRateOffset)), FMath::Clamp(RateOfMovement, 0.0f, 1.0f)));
+			this->SetActorLocation(FMath::Lerp(GetActorLocation(), (OwningCharacter->GetActorLocation() + (OwningCharacter->GetActorForwardVector()*-FollowRateOffset)), FMath::Clamp(RateOfMovement, 0.0f, 1.0f)));
 		}
 	}
 }
 
-void ASuckUmms::PickUp(ASuckEmUpCharacter* thisCharacter, float followRate)
+void ASuckUmms::PickUp(ASuckEmUpCharacter* character, float followRate)
 {
 	RateOfMovement = 0;
-	character = thisCharacter;
+	OwningCharacter = character;
 	bPlayerThrow = false;
 	bPlayerHas = true;
 	FollowRateOffset = followRate;
@@ -72,10 +64,10 @@ void ASuckUmms::OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* Ot
 {
 	if (bPlayerThrow)
 	{
-		ASuckEmUpCharacter* thisCharacter = Cast<ASuckEmUpCharacter>(OtherActor);
-		if (thisCharacter && thisCharacter != character)
+		ASuckEmUpCharacter* character = Cast<ASuckEmUpCharacter>(OtherActor);
+		if (character && character != OwningCharacter)
 		{
-			thisCharacter->StunMe(2.0f);
+			OwningCharacter->StunPlayer(2.0f);
 		}
 	}
 }

@@ -99,9 +99,10 @@ void ASuckEmUpCharacter::SetupPlayerInputComponent(class UInputComponent* InputC
 	// Note: the 'Jump' action and the 'MoveRight' axis are bound to actual keys/buttons/sticks in DefaultInput.ini (editable from Project Settings..Input)
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ASuckEmUpCharacter::MyJump);
 	InputComponent->BindAxis("MoveRight", this, &ASuckEmUpCharacter::MoveRight);
-	InputComponent->BindAction("Suck", IE_Pressed, this, &ASuckEmUpCharacter::SuckEm);
+	InputComponent->BindAction("SuckLess", IE_Pressed, this, &ASuckEmUpCharacter::SuckMore);
+	InputComponent->BindAction("SuckMore", IE_Pressed, this, &ASuckEmUpCharacter::SuckLess);
 	InputComponent->BindAction("Up", IE_Pressed, this, &ASuckEmUpCharacter::Up);
-	InputComponent->BindAction("Shoot", IE_Pressed, this, &ASuckEmUpCharacter::ShootSuckUmms);
+	InputComponent->BindAction("Shoot", IE_Pressed, this, &ASuckEmUpCharacter::ShootSuckUmm);
 }
 
 void ASuckEmUpCharacter::MoveRight(float Value)
@@ -143,7 +144,7 @@ void ASuckEmUpCharacter::Up()
 	
 	
 }
-void ASuckEmUpCharacter::MyJump()
+void ASuckEmUpCharacter::Jump()
 {
 	if (CanWalk && !bStun)
 	{
@@ -314,12 +315,7 @@ void ASuckEmUpCharacter::Tick(float DeltaSeconds)
 	}
 }
 
-void ASuckEmUpCharacter::PossessedBy(class AController* InController)
-{
-	Super::PossessedBy(InController);
-}
-
-void ASuckEmUpCharacter::ShootSuckUmms()
+void ASuckEmUpCharacter::ShootSuckUmm()
 {
 	for (TActorIterator<ASuckUmms> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
@@ -331,8 +327,8 @@ void ASuckEmUpCharacter::ShootSuckUmms()
 		}
 	}
 }
-void ASuckEmUpCharacter::StunMe(float amount)
+void ASuckEmUpCharacter::StunPlayer(float stunTime)
 {
-	StunLength = amount;
-	bStun = true;
+	StunLength = stunTime;
+	bStunned = true;
 }
