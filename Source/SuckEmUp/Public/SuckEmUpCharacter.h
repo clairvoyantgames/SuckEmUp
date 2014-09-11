@@ -55,9 +55,9 @@ class ASuckEmUpCharacter : public APaperCharacter
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
 	float baseSuckerScale;
 
-	void ShootSuckUmm();
+	void ShootSuckUmms();
 
-	void StunPlayer(float stunTime);
+	void StunMe(float amount);
 protected:
 	// The animation to play while running around
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Animations)
@@ -83,10 +83,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animations)
 	class UPaperFlipbook* SuckDownAnimation;
 	
-	UFUNCTION()
-		void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
-
-	void SuckMore();
+	void SuckEm();
 
 	void Up();
 
@@ -94,7 +91,11 @@ protected:
 
 	float FollowersOffset;
 
-	bool bStunned;
+	UFUNCTION()
+	void OnBeginOverlap(AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & hit);
+
+	bool bStun;
+
 	
 	float StunLength;
 protected:

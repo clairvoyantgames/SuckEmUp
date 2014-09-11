@@ -13,15 +13,24 @@ UCLASS()
 class SUCKEMUP_API ASuckUmms : public AActor
 {
 	GENERATED_UCLASS_BODY()
+	// Collision Component of Ball
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement)
+	TSubobjectPtr<class UBoxComponent> CollisionComp;
 
-	// Sprite
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Sprite)
-	TSubobjectPtr<UPaperFlipbookComponent> Sprite;
+
+	// Ball mesh
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Mesh)
+	TSubobjectPtr<UStaticMeshComponent> Mesh;
 	
 	bool bPlayerHas;
+	ASuckEmUpCharacter* character;
 
-	ASuckEmUpCharacter* OwningCharacter;
-		
+	// Override Tick
+	virtual void Tick(float DeltaSeconds) OVERRIDE;
+
+	// Begin Play function
+	virtual void BeginPlay() OVERRIDE;
+	
 	void PickUp(ASuckEmUpCharacter* thisCharacter, float followRate);
 
 	float RateOfMovement;
